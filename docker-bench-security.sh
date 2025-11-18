@@ -1,3 +1,4 @@
+#Este encabezado indica que el script se ejecuta con Bash ///////////////////////////////////////////////
 #!/bin/bash
 # --------------------------------------------------------------------------------------------
 # Docker Bench for Security
@@ -7,10 +8,11 @@
 # Checks for dozens of common best-practices around deploying Docker containers in production.
 # --------------------------------------------------------------------------------------------
 
+# En la documentación original se indica que está basado en CIS Docker Benchmark 1.6.0 ///////////////////////////////////
 version='1.6.0'
 
+#Carga de librerias externas, importan funciones externas desde otros scripts de la carpeta functions /////////////////////////////////////////////////////////////////
 LIBEXEC="." # Distributions can change this to /usr/libexec or similar.
-
 # Load dependencies
 . $LIBEXEC/functions/functions_lib.sh
 . $LIBEXEC/functions/helper_lib.sh
@@ -23,17 +25,32 @@ readonly version
 readonly this_path
 readonly myname
 
+#Configuración del entorno de ejecución del script /////////////////////////////////////////////////////////////////
 export PATH="$PATH:/bin:/sbin:/usr/bin:/usr/local/bin:/usr/sbin/"
 
 # Check for required program(s)
 req_programs 'awk docker grep sed stat tail tee tr wc xargs'
 
+
+#Verificación de conexión con el demonio de Docker, sino se ejecuta, se termina el script inmediatamente /////////////////////////////////////////////////////////////////
 # Ensure we can connect to docker daemon
 if ! docker ps -q >/dev/null 2>&1; then
   printf "Error connecting to docker daemon (does docker ps work?)\n"
   exit 1
 fi
 
+#Definición del comando de ayuda y las opciones disponibles /////////////////////////////////////////////////////////////////
+#Esta función imprime la ayuda del script y parametros como:
+
+# Ejecutar solo ciertos checks.
+
+# Excluir verificaciones específicas.
+
+# Filtrar por nombres, etiquetas o usuarios.
+
+# Registrar los resultados en archivos de log.
+
+# Mostrar o no las recomendaciones de remediación.
 usage () {
   cat <<EOF
 Docker Bench for Security - Docker, Inc. (c) 2015-$(date +"%Y")
@@ -44,6 +61,7 @@ Usage: ${myname}.sh [OPTIONS]
 
 Example:
   - Only run check "2.2 - Ensure the logging level is set to 'info'":
+
       sh docker-bench-security.sh -c check_2_2
   - Run all available checks except the host_configuration group and "2.8 - Enable user namespace support":
       sh docker-bench-security.sh -e host_configuration,check_2_8
@@ -73,15 +91,14 @@ EOF
 if [ ! -d log ]; then
   mkdir log
 fi
-
-logger="log/${myname}.log"
-limit=0
+#Inicialización y variables globales /////////////////////////////////////////////////////////////////
+logger="log/${myname}.log"        # Archivo que crea el log
+limit=0                          # Límite de elementos a mostrar en la salida JSON
 printremediation="0"
 globalRemediation=""
 
-# Get the flags
-# If you add an option here, please
-# remember to update usage() above.
+#Gestion de argumentos y opciones pasadas al script /////////////////////////////////////////////////////////////////
+#Esto procesa los parámetros que el usuario ingresa al ejecutar el script.
 while getopts bhl:u:c:e:i:x:t:n:p args
 do
   case $args in
@@ -99,18 +116,21 @@ do
   *) usage; exit 1 ;;
   esac
 done
+#Cada opción se almacena en una variable para usarse después en la ejecución.
 
 # Load output formating
 . $LIBEXEC/functions/output_lib.sh
 
 yell_info
 
+#Advertencia si no se ejecuta como root /////////////////////////////////////////////////////////////////
 # Warn if not root
 if [ "$(id -u)" != "0" ]; then
   warn "$(yell 'Some tests might require root to run')\n"
   sleep 3
 fi
 
+#Variables de puntuación /////////////////////////////////////////////////////////////////
 # Total Score
 # Warn Scored -1, Pass Scored +1, Not Score -0
 
@@ -120,6 +140,16 @@ currentScore=0
 logit "Initializing $(date +%Y-%m-%dT%H:%M:%S%:z)\n"
 beginjson "$version" "$(date +%s)"
 
+#Función principal del script /////////////////////////////////////////////////////////////////
+#Se obtiene la configuración actual de Docker.
+
+#Se identifican los contenedores e imágenes con etiquetas específicas.
+
+#Se cargan los scripts de prueba desde la carpeta tests/.
+
+#Se ejecutan las funciones check_x_x definidas en los archivos fuente.
+
+#Se generan reportes con resultados y se calcula el puntaje final.
 # Load all the tests from tests/ and run them
 main () {
   logit "\n${bldylw}Section A - Check results${txtrst}"
@@ -163,6 +193,8 @@ main () {
     images=$(docker images -q $LABELS| grep -v "$benchcont")
   fi
 
+#Ejecución de los tests /////////////////////////////////////////////////////////////////
+#Esto carga todos los scripts de prueba de la carpeta tests/
   for test in $LIBEXEC/tests/*.sh; do
     . "$test"
   done
@@ -206,6 +238,8 @@ main () {
       done
     fi
   done
+#Resultados y remedio /////////////////////////////////////////////////////////////////
+#Muestra cómo corregir los hallazgos
 
   if [ -n "${globalRemediation}" ] && [ "$printremediation" = "1" ]; then
     logit "\n\n${bldylw}Section B - Remediation measures${txtrst}"
@@ -220,3 +254,4 @@ main () {
 }
 
 main "$@"
+#Finalización del script /////////////////////////////////////////////////////////////////
