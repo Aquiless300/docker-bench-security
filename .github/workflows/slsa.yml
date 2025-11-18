@@ -20,7 +20,8 @@ jobs:
       hashes: ${{ steps.hash.outputs.hashes }}
     runs-on: ubuntu-latest
     steps:
-
+      - name: Create log directory
+        run: mkdir -p log
       - name: Harden Runner
         uses: step-security/harden-runner@v2.7.0
         with:
@@ -116,11 +117,11 @@ jobs:
         with:
           context: .
           push: true
-          tags: aquiless300/docker-bench-security:latest
+          tags: gabrielgod/docker-bench-security:latest
 
 
 
-  # -------------------------------------------------------
+  # --------------------------------------------------------
   # JOB 4: PROVENANCE SLSA
   # -------------------------------------------------------
   provenance:
