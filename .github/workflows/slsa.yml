@@ -71,7 +71,7 @@ jobs:
           done
 
       - name: Vulnerability Scan (Trivy)
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@0.21.0
         with:
           scan-type: 'fs'
           severity: 'HIGH,CRITICAL'
@@ -87,7 +87,7 @@ jobs:
 
       - name: Create issue on failure
         if: failure()
-        uses: peter-evans/create-issue-from-file@v4
+        uses: peter-evans/create-issue-from-file@v5
         with:
           title: "Error detected in CI pipeline"
           content-filepath: ./log/error.log
@@ -130,7 +130,7 @@ jobs:
       actions: read
       id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.10.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
     with:
       base64-subjects: "${{ needs.build.outputs.hashes }}"
       upload-assets: ${{ startsWith(github.ref, 'refs/tags/') }}
