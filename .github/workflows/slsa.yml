@@ -70,7 +70,7 @@ jobs:
           done
 
       - name: Vulnerability Scan (Trivy)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.20.0
         with:
           scan-type: 'fs'
           severity: 'HIGH,CRITICAL'
@@ -114,8 +114,10 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
+          context: .
           push: true
-          tags: Aquiless300/docker-bench-security:latest
+          tags: aquiless300/docker-bench-security:latest
+
 
 
   # -------------------------------------------------------
