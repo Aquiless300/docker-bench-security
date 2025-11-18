@@ -74,9 +74,12 @@ jobs:
         with:
           scan-type: 'fs'
           severity: 'HIGH,CRITICAL'
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: execution-logs
 
       - name: Upload logs
-      - uses: actions/download-artifact@v4
         uses: actions/upload-artifact@v4
         with:
           name: execution-logs
